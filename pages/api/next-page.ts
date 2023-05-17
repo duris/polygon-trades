@@ -1,13 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const { url } = req.body;
+  const apiUrl = url + `&apiKey=${process.env.POLYGON_API_KEY}`;
   try {
-    const response = await fetch(
-      `https://api.polygon.io/v3/trades/AAPL?timestamp.gt=1684243800000000000&order=asc&limit=50&apiKey=${process.env.POLYGON_API_KEY}`,
-      {
-        method: "get",
-      }
-    );
+    const response = await fetch(apiUrl, {
+      method: "get",
+    });
 
     const data = await response.json();
 
