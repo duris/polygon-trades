@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const response = await fetch(
-      `https://api.polygon.io/v3/trades/AAPL?timestamp.gt=1684243800000000000&order=asc&limit=50000&apiKey=${process.env.POLYGON_API_KEY}`,
+      `https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2023-01-01/2023-05-16?adjusted=true&sort=asc&limit=120&apiKey=${process.env.POLYGON_API_KEY}`,
       {
         method: "get",
       }
@@ -18,3 +18,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default handler;
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+};

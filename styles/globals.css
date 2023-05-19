@@ -25,3 +25,16 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.candlestick {
+  width: 5px;
+  margin-right: 1px;
+  position: absolute;
+}
+
+.wick {
+  width: 1px;
+  background-color: black;
+  margin-right: 4px;
+  position: absolute;
+}
