@@ -1,11 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { PrismaClient } from "@prisma/client";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  // const { ticker, date, limit } = req.body;
+  const prisma = new PrismaClient();
+
+  const { date } = req.body;
+
+  console.log(date);
 
   try {
     const response = await fetch(
-      `https://api.polygon.io/v3/trades/AAPL?timestamp.gt=1684243800000000000&order=asc&limit=50000&apiKey=${process.env.POLYGON_API_KEY}`,
+      `https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks/${date}?adjusted=true&apiKey=${process.env.POLYGON_API_KEY}`,
       {
         method: "get",
       }

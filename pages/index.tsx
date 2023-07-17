@@ -146,97 +146,8 @@ export default function Home() {
           close: candle.c,
         });
       });
-      let oneMinuteData = [
-        {
-          time: "2023-05-16T09:30:00",
-          open: 139.87,
-          high: 154.69,
-          low: 85.66,
-          close: 111.26,
-        },
-        {
-          time: "2023-05-16T09:31:00",
-          open: 141.22,
-          high: 156.21,
-          low: 87.32,
-          close: 112.78,
-        },
-        // more 1-minute data...
-      ];
 
       candlestickSeries.setData(polygonCandles);
-      // candlestickSeries.setData([
-      //   {
-      //     time: "2023-05-07",
-      //     open: 75.16,
-      //     high: 82.84,
-      //     low: 36.16,
-      //     close: 45.72,
-      //   },
-      //   {
-      //     time: "2023-05-08",
-      //     open: 45.12,
-      //     high: 53.9,
-      //     low: 45.12,
-      //     close: 48.09,
-      //   },
-      //   {
-      //     time: "2023-05-09",
-      //     open: 60.71,
-      //     high: 60.71,
-      //     low: 53.39,
-      //     close: 59.29,
-      //   },
-      //   {
-      //     time: "2023-05-10",
-      //     open: 68.26,
-      //     high: 68.26,
-      //     low: 59.04,
-      //     close: 60.5,
-      //   },
-      //   {
-      //     time: "2023-05-11",
-      //     open: 67.71,
-      //     high: 105.85,
-      //     low: 66.67,
-      //     close: 91.04,
-      //   },
-      //   {
-      //     time: "2023-05-12",
-      //     open: 91.04,
-      //     high: 121.4,
-      //     low: 82.7,
-      //     close: 111.4,
-      //   },
-      //   {
-      //     time: "2023-05-13",
-      //     open: 111.51,
-      //     high: 142.83,
-      //     low: 103.34,
-      //     close: 131.25,
-      //   },
-      //   {
-      //     time: "2023-05-14",
-      //     open: 131.33,
-      //     high: 151.17,
-      //     low: 77.68,
-      //     close: 96.43,
-      //   },
-      //   {
-      //     time: "2023-05-15",
-      //     open: 106.33,
-      //     high: 110.2,
-      //     low: 90.39,
-      //     close: 98.1,
-      //   },
-      //   {
-      //     time: "2023-05-16",
-      //     open: 139.87,
-      //     high: 114.69,
-      //     low: 85.66,
-      //     close: 111.26,
-      //   },
-      // ]);
 
       chart.timeScale().fitContent();
 
@@ -257,7 +168,22 @@ export default function Home() {
     return await response.json();
   };
 
-  const processTrade = (trade: AveragedTrade) => {
+  function throttle<T, F extends (this: T, ...args: any[]) => void>(
+    func: F,
+    limit: number
+  ): (...args: Parameters<F>) => void {
+    let inThrottle: boolean;
+
+    return function (this: T, ...args: Parameters<F>): void {
+      if (!inThrottle) {
+        func.apply(this, args);
+        inThrottle = true;
+        setTimeout(() => (inThrottle = false), limit);
+      }
+    };
+  }
+
+  const processTrade = throttle((trade: AveragedTrade) => {
     if (chartApi) {
       // Convert trade data to area and candlestick series format
       const time = "2023-05-16";
@@ -270,18 +196,9 @@ export default function Home() {
         low: movingCandle.low,
         close: trade.price,
       };
-
-      // console.log("Processing trade:", trade);
-      // console.log("Trade timestamp:", trade.sip_timestamp);
-
-      // console.log("Area data:", areaData);
-      // console.log("Candlestick data:", candlestickData);
-
-      // Update the area and candlestick series
-      // chartApi.areaSeries.update(areaData);
       chartApi.candlestickSeries.update(candlestickData);
     }
-  };
+  }, 100); // Update at most once per second
 
   const getAverageTradesPerMillisecond = (trades: Trade[]): AveragedTrade[] => {
     const tradeGroups: Record<number, { sum: number; count: number }> = {};
@@ -342,14 +259,6 @@ export default function Home() {
       }, index * replayDelay);
     });
   };
-
-  // useEffect(() => {
-  //   const openTime = new Date();
-  //   openTime.setHours(9, 30, 0);
-  //   openTime.setDate(15);
-
-  //   console.log("Starting time: " + Date.parse(String(openTime)) * 1000000);
-  // }, []);
 
   useEffect(() => {
     if (chartApi) {
